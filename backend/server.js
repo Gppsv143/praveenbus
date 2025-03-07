@@ -20,7 +20,7 @@ app.get('/api/buses', async (req, res) => {
   try {
     const { source, destination, date } = req.query;
     const result = await pool.query(
-      `SELECT buses.*, routes.* FROM buses JOIN routes ON buses.id = routes.bus_id WHERE routes.source = $1 AND routes.destination = $2 AND DATE(routes.departure_time) = $3`,
+      `SELECT buses.*, routes.* FROM buses JOIN routes ON buses.id = routes.bus_id WHERE routes.source = $1 AND routes.destination = $2 AND DATE(routes.departure_time) >= $3`,
       [source, destination, date]
     );
     res.json(result.rows);
@@ -29,7 +29,6 @@ app.get('/api/buses', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 app.post('/api/bookings', async (req, res) => {
   try {
     const { userId, routeId, seatNumber } = req.body;
@@ -45,6 +44,6 @@ app.post('/api/bookings', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
