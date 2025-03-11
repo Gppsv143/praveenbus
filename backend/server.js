@@ -2,41 +2,39 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { Pool } = require('pg');
+const mysql = require('mysql2');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const pool = new Pool({
-  user: process.env.DB_USER,
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
+  user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   port: process.env.DB_PORT,
-});
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+}).promise();
 
 app.get('/api/buses', async (req, res) => {
   try {
     const { source, destination, date } = req.query;
-    const result = await pool.query(
-      `SELECT buses.*, routes.* FROM buses JOIN routes ON buses.id = routes.bus_id WHERE routes.source = $1 AND routes.destination = $2 AND DATE(routes.departure_time) >= $3`,
+    if (!source || !destination || !date) {
+      return res.status(400).json({ error: 'Missing required query parameters' });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT buses.*, routes.* FROM buses 
+       JOIN routes ON buses.id = routes.bus_id 
+       WHERE routes.source = ? AND routes.destination = ? 
+       AND DATE(routes.departure_time) >= ?`,
       [source, destination, date]
     );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
-app.post('/api/bookings', async (req, res) => {
-  try {
-    const { userId, routeId, seatNumber } = req.body;
-    await pool.query(
-      'INSERT INTO bookings (user_id, route_id, seat_number) VALUES ($1, $2, $3)',
-      [userId, routeId, seatNumber]
-    );
-    res.json({ message: 'Booking successful' });
+
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).send('Server error');
@@ -45,5 +43,6 @@ app.post('/api/bookings', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
+
