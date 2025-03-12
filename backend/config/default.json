@@ -1,0 +1,8 @@
+{
+  "jwtSecret": "your_secret_key",
+  "emailService": {
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "secure": false
+  }
+}
