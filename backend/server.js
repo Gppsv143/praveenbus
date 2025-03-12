@@ -1,48 +1,20 @@
-require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const mysql = require('mysql2');
+const dotenv = require('dotenv');
+const authRoutes = require('./routes/authRoutes');
+const busRoutes = require('./routes/busRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const errorHandler = require('./middleware/errorHandler');
 
+dotenv.config();
 const app = express();
-app.use(bodyParser.json());
-app.use(cors());
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-  port: process.env.DB_PORT,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-}).promise();
+app.use(express.json());
+app.use('/api/auth', authRoutes);
+app.use('/api/bus', busRoutes);
+app.use('/api/booking', bookingRoutes);
 
-app.get('/api/buses', async (req, res) => {
-  try {
-    const { source, destination, date } = req.query;
-    if (!source || !destination || !date) {
-      return res.status(400).json({ error: 'Missing required query parameters' });
-    }
-
-    const [rows] = await pool.query(
-      `SELECT buses.*, routes.* FROM buses 
-       JOIN routes ON buses.id = routes.bus_id 
-       WHERE routes.source = ? AND routes.destination = ? 
-       AND DATE(routes.departure_time) >= ?`,
-      [source, destination, date]
-    );
-
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
