@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+node_modules/
+package-lock.json
+package.json
+.env
+.DS_Store
+coverage/
+dist/
+logs/
+logs/
+tmp/
+temp/
+build/
