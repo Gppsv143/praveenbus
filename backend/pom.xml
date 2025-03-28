@@ -75,7 +75,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.praveenbus.Application</mainClass>
+                            <mainClass>com.praveenbus.PraveenbusApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
