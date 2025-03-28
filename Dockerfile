@@ -5,8 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the application JAR file to the container
-COPY target/praveenbus-backend.jar app.jar
-
+COPY target/praveenbus-backend-1.0.0.jar /app/praveenbus-backend.jar
 # Expose the application's port
 EXPOSE 9090
 
