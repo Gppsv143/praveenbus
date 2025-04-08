@@ -7,17 +7,13 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Bus {
-
+public class Operator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String busName;
-    private String busType;
-    private int totalSeats;
-    private double price;
-
-    // Add other fields as required
+    private String name;
+    private String phoneNumber;
+    private String email;
+    private String password;
 }
