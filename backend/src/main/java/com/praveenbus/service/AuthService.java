@@ -1,23 +1,23 @@
-package com.praveenbus.service;
+package com.praveenbus.controller;
 
-import com.praveenbus.model.LoginRequest;
-import com.praveenbus.model.JwtResponse;
+import com.praveenbus.payload.RegisterRequest;
+import com.praveenbus.service.AuthService;
+import com.praveenbus.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Service
-public class AuthService {
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
 
     @Autowired
-    private JwtService jwtService;
+    private AuthService authService;
 
-    public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        // Replace with actual DB validation
-        if ("admin".equals(loginRequest.getUsername()) &&
-            "admin123".equals(loginRequest.getPassword())) {
-            String token = jwtService.generateToken(loginRequest.getUsername());
-            return new JwtResponse(token);
-        }
-        throw new RuntimeException("Invalid Credentials");
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody RegisterRequest request) {
+        User user = authService.register(request);
+        return ResponseEntity.ok("User registered successfully!");
     }
 }
+
