@@ -29,13 +29,25 @@ public class TicketController {
 
         ticketRepo.save(ticket);
 
-        String message = "Dear user, your ticket is booked. Ticket No: " + ticketId;
+        String message = "Dear user, your ticket is booked.\n" +
+                         "Ticket No: " + ticketId + "\n" +
+                         "Bus: " + ticket.getBusName() + "\n" +
+                         "Date: " + ticket.getTravelDate() + "\n" +
+                         "Seat: " + ticket.getSeatNumber() + "\n" +
+                         "Boarding Point: " + ticket.getBoardingPoint();
 
         // Send email
-        emailService.sendTicketEmail(ticket.getUserEmail(), "PraveenBus Ticket", message);
+        emailService.sendTicketEmail(
+                ticket.getUserEmail(),
+                "PraveenBus Ticket - " + ticketId,
+                message
+        );
 
         // Send SMS
-        smsService.sendSMS(ticket.getUserMobile(), message);
+        smsService.sendSMS(
+                String.valueOf(ticket.getUserMobile()),
+                message
+        );
 
         return "Ticket booked successfully with Ticket No: " + ticketId;
     }
