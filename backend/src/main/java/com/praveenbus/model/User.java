@@ -1,31 +1,47 @@
 package com.praveenbus.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+
+@Entity
 public class User {
 
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String mobileNumber;
+
+    @Column(nullable = false, unique = true)
     private String email;
-    private String phone;
+
+    @Column(nullable = false)
     private String password;
 
-    // Constructor
+    // Constructors
     public User() {}
 
-    public User(Long id, String name, String email, String phone, String password) {
-        this.id = id;
+    public User(String name, String mobileNumber, String email, String password) {
         this.name = name;
+        this.mobileNumber = mobileNumber;
         this.email = email;
-        this.phone = phone;
         this.password = password;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    // Getters & Setters
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -36,20 +52,20 @@ public class User {
         this.name = name;
     }
 
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getPassword() {

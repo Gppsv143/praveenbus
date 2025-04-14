@@ -1,34 +1,39 @@
-package com.praveenbus.service;
+package com.praveenbus.controller;
 
 import com.praveenbus.model.User;
-import com.praveenbus.payload.RegisterRequest;
 import com.praveenbus.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Service
-@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/auth")
 public class AuthController {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public User register(RegisterRequest request) {
-        if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
-            throw new RuntimeException("Mobile number already in use");
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (userRepository.existsByMobileNumber(user.getMobileNumber())) {
+            return new ResponseEntity<>("Mobile number already exists", HttpStatus.BAD_REQUEST);
         }
-
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
         }
-
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setMobileNumber(request.getMobileNumber());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        return userRepository.save(user);
+        // Ideally, you should encrypt the password before saving
+        User newUser = new User();
+        newUser.setName(user.getName());
+        newUser.setEmail(user.getEmail());
+        newUser.setMobileNumber(user.getMobileNumber());
+        newUser.setPassword(user.getPassword()); // Remember to hash this!
+        User savedUser = userRepository.save(newUser);
+        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
-}
 
+    // You would typically have a /login endpoint here as well
+}
