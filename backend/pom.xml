@@ -59,16 +59,23 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JJWT Dependency -->
+        <!-- JJWT Dependency (Updated to 0.10.7 as fallback) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.11.5</version>
+            <version>0.10.7</version>
         </dependency>
 
         <!-- Other Dependencies -->
         <!-- Add any other dependencies as needed -->
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
