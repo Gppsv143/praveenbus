@@ -66,6 +66,14 @@
             <version>0.11.5</version>
         </dependency>
 
+        <!-- Lombok Dependency for annotation processing -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Spring Boot Test dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
