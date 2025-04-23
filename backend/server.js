@@ -1,16 +1,14 @@
-// backend/server.js
 const express = require('express');
-const bodyParser = require('body-parser');
-const authRoutes = require('./routes/authRoutes');
-const busRoutes = require('./routes/busRoutes');
-
 const app = express();
-app.use(bodyParser.json());
+const dotenv = require('dotenv');
+const cors = require('cors');
 
-app.use('/api/auth', authRoutes);
-app.use('/api/bus', busRoutes);
+dotenv.config();
+app.use(cors());
+app.use(express.json());
+
+app.use('/api', require('./routes/authRoutes'));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
