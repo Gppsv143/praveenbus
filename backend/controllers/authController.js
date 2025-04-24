@@ -1,44 +1,94 @@
-const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { sendOTP } = require('../utils/otpService');
 
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+// Register user
+const registerUser = async (req, res) => {
+  const { name, email, phone, password } = req.body;
 
-exports.signup = async (req, res) => {
-  const { name, age, gender, mobile, email } = req.body;
-  const otp = generateOTP();
+  // Check if all fields are provided
+  if (!name || !email || !phone || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
 
   try {
-    await sendOTP(mobile, otp);
-    res.json({ message: "OTP sent", otp }); // show OTP only for testing
+    // Check if the phone number already exists in the database
+    const [existingPhone] = await global.db.query('SELECT * FROM users WHERE phone = ?', [phone]);
+    // Check if the email already exists in the database
+    const [existingEmail] = await global.db.query('SELECT * FROM users WHERE email = ?', [email]);
+
+    // If phone number is already registered, return an error
+    if (existingPhone.length > 0) {
+      return res.status(400).json({ message: 'Phone number already registered' });
+    }
+
+    // If email is already registered, return an error
+    if (existingEmail.length > 0) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Hash the password before saving it in the database
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert the new user into the database
+    await global.db.query(
+      'INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)',
+      [name, email, phone, hashedPassword]
+    );
+
+    // Respond with success message
+    res.status(201).json({ message: 'User registered successfully' });
+
   } catch (err) {
-    res.status(500).json({ error: "OTP failed" });
+    // Catch any unexpected errors and respond with an internal server error
+    console.error('Error during registration:', err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-exports.verifyOtpAndRegister = async (req, res) => {
-  const { name, age, gender, mobile, email, otp, enteredOtp, password } = req.body;
-  if (otp !== enteredOtp) return res.status(401).json({ error: "Invalid OTP" });
+// Login user
+const loginUser = async (req, res) => {
+  const { email, phone, password } = req.body;
 
-  const hash = await bcrypt.hash(password, 10);
-  const sql = `INSERT INTO users (name, age, gender, mobile, email, password) VALUES (?, ?, ?, ?, ?, ?)`;
-  db.query(sql, [name, age, gender, mobile, email, hash], (err, result) => {
-    if (err) return res.status(500).json({ error: "Signup failed" });
-    const token = jwt.sign({ id: result.insertId }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ message: "Signup success", token });
-  });
+  if (!email && !phone) {
+    return res.status(400).json({ message: 'Email or phone number is required' });
+  }
+  if (!password) {
+    return res.status(400).json({ message: 'Password is required' });
+  }
+
+  try {
+    // Find user by email or phone number
+    const [user] = await global.db.query(
+      'SELECT * FROM users WHERE email = ? OR phone = ?',
+      [email, phone]
+    );
+
+    if (user.length === 0) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    // Compare the hashed password with the stored password in the database
+    const isPasswordValid = await bcrypt.compare(password, user[0].password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Invalid password' });
+    }
+
+    // Create JWT token after successful login
+    const token = jwt.sign(
+      { userId: user[0].id, name: user[0].name },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '1h' }
+    );
+
+    // Respond with the user data and the generated token
+    res.status(200).json({ message: 'Login successful', token });
+
+  } catch (err) {
+    console.error('Error during login:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-exports.login = (req, res) => {
-  const { mobile, password } = req.body;
-  db.query(`SELECT * FROM users WHERE mobile = ?`, [mobile], async (err, result) => {
-    if (err || result.length === 0) return res.status(401).json({ error: "User not found" });
-    const match = await bcrypt.compare(password, result[0].password);
-    if (!match) return res.status(401).json({ error: "Wrong password" });
-
-    const token = jwt.sign({ id: result[0].id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ message: "Login success", token });
-  });
-};
+module.exports = { registerUser, loginUser };
 
