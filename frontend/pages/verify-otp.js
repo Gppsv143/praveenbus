@@ -1,33 +1,47 @@
-import { useRouter } from "next/router";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
-export default function VerifyOTP() {
-  const router = useRouter();
+export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
+  const router = useRouter();
 
-  const handleVerify = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (otp === "123456") {
-      alert("OTP Verified! Redirecting...");
-      router.push("/dashboard/user"); // or operator, depending
-    } else {
-      alert("Invalid OTP");
+    try {
+      const res = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ otp }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Redirect to dashboard or next page
+        router.push("/dashboard");
+      } else {
+        alert(data.message || "OTP verification failed");
+      }
+    } catch (err) {
+      console.error("Error:", err);
     }
   };
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h1>Verify OTP</h1>
-      <form onSubmit={handleVerify}>
+    <div>
+      <h2>Enter OTP</h2>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Enter OTP"
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
-          required
-        /><br /><br />
-        <button type="submit">Verify</button>
+        />
+        <button type="submit">Verify OTP</button>
       </form>
     </div>
   );
 }
+

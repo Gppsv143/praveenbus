@@ -1,27 +1,32 @@
-const twilio = require('twilio');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
-// Create Twilio client with credentials from .env file
-const client = twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// Set up Nodemailer with Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_EMAIL,  // Your Gmail email
+    pass: process.env.GMAIL_PASSWORD,  // The generated app password
+  },
+});
 
-// Function to send OTP
-const sendOtp = async (userPhoneNumber, otp) => {
+// Function to send OTP via email
+const sendOTP = async (email, otp) => {
+  const mailOptions = {
+    from: process.env.GMAIL_EMAIL,
+    to: email,
+    subject: 'Your OTP for PraveenBus',
+    text: `Your OTP is: ${otp}`,
+  };
+
   try {
-    const message = await client.messages.create({
-      body: `Your OTP code is ${otp}`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: `+91${userPhoneNumber}` // Must include +91 for Indian numbers
-    });
-
-    console.log('OTP sent:', message.sid);
-    return { success: true };
+    await transporter.sendMail(mailOptions);
+    console.log('OTP sent successfully');
   } catch (error) {
     console.error('Error sending OTP:', error);
-    return { success: false, error: error.message };
+    throw new Error('Error sending OTP');
   }
 };
 
-module.exports = { sendOtp };
+module.exports = sendOTP;
 

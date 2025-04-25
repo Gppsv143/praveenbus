@@ -1,7 +1,0 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/operator-signup": "pages/operator-signup.js",
-  "/verify-otp": "pages/verify-otp.js"
-}
