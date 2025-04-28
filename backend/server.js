@@ -1,26 +1,17 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
+const bodyParser = require('body-parser');
+const addBusRoute = require('./routes/addBus'); // Ensure the correct router is imported
 
-// Enable CORS to allow requests from your frontend (e.g., running on 52.204.14.231:3000)
-app.use(cors({
-  origin: 'http://52.204.14.231:3000',  // Update to match your frontend IP and port
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-}));
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
 
-// Your existing backend routes, models, etc.
-app.get('/', (req, res) => {
-    res.send('Backend is working!');
-});
+// Use the router for /api requests
+app.use('/api', addBusRoute); // All routes defined in addBus.js will be prefixed with /api
 
-// Example API endpoint
-app.get('/api/data', (req, res) => {
-    res.json({ message: 'This is data from the backend' });
-});
-
-// Listen on all IPs (0.0.0.0) and port 5000
-app.listen(5000, '0.0.0.0', () => {
-    console.log('Backend server running on port 5000 and accessible via 52.204.14.231');
+// Start the server
+const port = 5000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
 

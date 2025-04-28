@@ -1,0 +1,41 @@
+# Kubernetes Deployment for Backend and Frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: praveenbus-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: praveenbus-backend
+  template:
+    metadata:
+      labels:
+        app: praveenbus-backend
+    spec:
+      containers:
+        - name: praveenbus-backend
+          image: yourusername/praveenbus-backend
+          ports:
+            - containerPort: 5000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: praveenbus-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: praveenbus-frontend
+  template:
+    metadata:
+      labels:
+        app: praveenbus-frontend
+    spec:
+      containers:
+        - name: praveenbus-frontend
+          image: yourusername/praveenbus-frontend
+          ports:
+            - containerPort: 3000

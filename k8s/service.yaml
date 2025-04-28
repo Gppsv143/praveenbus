@@ -1,0 +1,27 @@
+# Kubernetes Service for Backend and Frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: praveenbus-backend
+spec:
+  selector:
+    app: praveenbus-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: LoadBalancer
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: praveenbus-frontend
+spec:
+  selector:
+    app: praveenbus-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer

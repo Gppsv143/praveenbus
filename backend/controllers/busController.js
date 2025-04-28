@@ -1,14 +1,24 @@
-// backend/controllers/busController.js
-const db = require('../config/db');
+const db = require('../config/db'); // Import the db connection pool
 
+// Controller function to add a new bus
 const addBus = async (req, res) => {
-  const { busName, seats, price } = req.body;
+  const { bus_name, bus_type, total_seats, price, operator_id } = req.body;
+
+  // SQL query to insert the bus data
+  const query = `INSERT INTO buses (bus_name, bus_type, total_seats, price, operator_id) VALUES (?, ?, ?, ?, ?)`;
+
   try {
-    await db.query('INSERT INTO buses (bus_name, seats, price) VALUES (?, ?, ?)', [busName, seats, price]);
-    res.status(200).json({ message: 'Bus added successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to add bus' });
+    // Use db.query with async/await
+    const [result] = await db.execute(query, [bus_name, bus_type, total_seats, price, operator_id]);
+
+    return res.status(200).send('Bus added successfully');
+  } catch (err) {
+    console.error('Error inserting bus:', err);
+    return res.status(500).send('Error adding bus');
   }
 };
 
-module.exports = { addBus };
+module.exports = {
+  addBus,
+};
+

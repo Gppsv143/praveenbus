@@ -1,6 +1,6 @@
+import BusList from "../components/BusList";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import BusList from "../components/BusList";
 
 const BusesPage = () => {
   const buses = [
@@ -20,4 +20,5 @@ const BusesPage = () => {
   );
 };
 
-export default
+export default BusesPage;
+
