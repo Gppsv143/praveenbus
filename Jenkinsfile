@@ -3,14 +3,14 @@ pipeline {
 
     environment {
         APP_NAME = "praveenbus"
-        BACKEND_IMAGE = "yourusername/praveenbus-backend"
-        FRONTEND_IMAGE = "yourusername/praveenbus-frontend"
+        BACKEND_IMAGE = "Gppsv143/praveenbus-backend"
+        FRONTEND_IMAGE = "Gppsv143/praveenbus-frontend"
     }
 
     stages {
         stage("Checkout") {
             steps {
-                git "https://github.com/yourusername/praveenbus.git"
+                git "https://github.com/Gppsv143/praveenbus.git"
             }
         }
 
@@ -65,4 +65,3 @@ pipeline {
         }
     }
 }
-
