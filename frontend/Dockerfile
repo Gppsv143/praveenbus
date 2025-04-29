@@ -11,14 +11,20 @@ USER root
 # Copy package files to install dependencies
 COPY package.json package-lock.json ./
 
-# Install the dependencies
-RUN npm install
+# Install the dependencies with --unsafe-perm flag to avoid permission issues
+RUN npm install --unsafe-perm=true
+
+# Change ownership of the app directory to appuser
+RUN chown -R appuser:appuser /app
+
+# Switch to appuser
+USER appuser
+
+# Ensure the user can write to the .next directory and other directories
+RUN mkdir -p /app/.next && chown -R appuser:appuser /app/.next
 
 # Copy the rest of the application code
 COPY . .
-
-# Switch to appuser after installation
-USER appuser
 
 # Build the Next.js app
 RUN npm run build
