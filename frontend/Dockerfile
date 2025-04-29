@@ -1,31 +1,31 @@
-# Use a newer version of Node.js (Node 16 or higher)
-FROM node:16
+# Use a compatible Node.js version for Next.js
+FROM node:18
 
-# Create and use a non-root user for security purposes
+# Create a non-root user and set up the working directory
 RUN useradd -m appuser
-
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first for better caching of dependencies
+# Set the user to root for installing dependencies
+USER root
+
+# Copy package files to install dependencies
 COPY package.json package-lock.json ./
 
-# Install the dependencies as root user (this avoids permissions issues)
-USER root
+# Install the dependencies
 RUN npm install
 
-# Switch to non-root user after installing dependencies
+# Switch back to the non-root user
 USER appuser
 
-# Copy the rest of the application code into the container
+# Copy the rest of the application code
 COPY . .
 
-# Build the app for production
+# Build the Next.js app
 RUN npm run build
 
-# Expose port 3000 (or the port your app is running on)
+# Expose the port the app will run on
 EXPOSE 3000
 
-# Start the app
+# Command to run the app
 CMD ["npm", "start"]
 
