@@ -3,22 +3,16 @@ pipeline {
 
     environment {
         APP_NAME = "praveenbus"
-        BACKEND_IMAGE = "Gppsv143/praveenbus-backend"
-        FRONTEND_IMAGE = "Gppsv143/praveenbus-frontend"
-<<<<<<< HEAD
-=======
+        BACKEND_IMAGE = "naidu289/praveenbus-backend"
+        FRONTEND_IMAGE = "naidu289/praveenbus-frontend"
         REGISTRY = "docker.io" // Docker Hub
->>>>>>> 1ab8403 (Updated Jenkinsfile)
+        DOCKER_CREDENTIALS = "dockerhub-credentials" // Jenkins credential ID for Docker Hub
     }
 
     stages {
         stage('Checkout') {
             steps {
-<<<<<<< HEAD
-                git "https://github.com/Gppsv143/praveenbus.git"
-=======
                 git branch: 'main', url: 'https://github.com/Gppsv143/praveenbus.git'
->>>>>>> 1ab8403 (Updated Jenkinsfile)
             }
         }
 
@@ -75,7 +69,7 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 script {
-                    withDockerRegistry([credentialsId: 'dockerhub-credentials', url: "https://${REGISTRY}"]) {
+                    withDockerRegistry([credentialsId: DOCKER_CREDENTIALS, url: "https://${REGISTRY}"]) {
                         sh "docker push ${BACKEND_IMAGE}:latest"
                         sh "docker push ${FRONTEND_IMAGE}:latest"
                     }
@@ -93,3 +87,4 @@ pipeline {
         }
     }
 }
+
