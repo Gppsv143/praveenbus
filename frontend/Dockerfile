@@ -14,14 +14,11 @@ COPY package.json package-lock.json ./
 # Install the dependencies
 RUN npm install
 
-# Switch back to the non-root user
-USER appuser
-
-# Give appuser permissions to the working directory
-RUN chown -R appuser:appuser /app
-
 # Copy the rest of the application code
 COPY . .
+
+# Switch to appuser after installation
+USER appuser
 
 # Build the Next.js app
 RUN npm run build
