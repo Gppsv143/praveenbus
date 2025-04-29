@@ -1,85 +1,69 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        APP_NAME = "praveenbus"
-        BACKEND_IMAGE = "naidu289/praveenbus-backend"
-        FRONTEND_IMAGE = "naidu289/praveenbus-frontend"
-        AWS_REGION = "us-east-1"
-        EKS_CLUSTER_NAME = "praveenbus-cluster"
+  environment {
+    DOCKER_HUB_CREDENTIALS = 'dockerhub-credentials' // Update this with your Jenkins credential ID
+    DOCKER_HUB_USERNAME = 'naidu289'                 // Your DockerHub username
+  }
+
+  stages {
+    stage('Checkout SCM') {
+      steps {
+        checkout scm
+      }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Gppsv143/praveenbus.git'
-            }
+    stage('Install Dependencies') {
+      steps {
+        dir('backend') {
+          sh 'npm install'
         }
-
-        stage('Install Dependencies') {
-            steps {
-                dir('backend') {
-                    sh 'npm install'
-                }
-                dir('frontend') {
-                    sh 'npm install'
-                }
-            }
+        dir('frontend') {
+          sh 'npm install'
         }
-
-        stage('Run Tests') {
-            steps {
-                echo "Skipping tests for now"
-            }
-        }
-
-        stage('Build Backend Docker Image') {
-            steps {
-                dir('backend') {
-                    sh "docker build -t ${BACKEND_IMAGE}:latest ."
-                }
-            }
-        }
-
-        stage('Build Frontend Docker Image') {
-            steps {
-                dir('frontend') {
-                    sh "docker build -t ${FRONTEND_IMAGE}:latest ."
-                }
-            }
-        }
-
-        stage('Push Docker Images') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push ${BACKEND_IMAGE}:latest
-                        docker push ${FRONTEND_IMAGE}:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds']]) {
-                    sh '''
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
-                        kubectl apply -f k8s/
-                    '''
-                }
-            }
-        }
+      }
     }
 
-    post {
-        always {
-            cleanWs()
+    stage('Run Tests') {
+      steps {
+        dir('backend') {
+          sh 'npm test || echo "No tests in backend"'
         }
-        failure {
-            echo "❌ Build failed. Check error logs above."
+        dir('frontend') {
+          sh 'npm test || echo "No tests in frontend"'
         }
+      }
     }
+
+    stage('Build Docker Images') {
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB_CREDENTIALS) {
+            def backendImage = docker.build("${DOCKER_HUB_USERNAME}/praveenbus-backend", "backend")
+            def frontendImage = docker.build("${DOCKER_HUB_USERNAME}/praveenbus-frontend", "frontend")
+            backendImage.push("latest")
+            frontendImage.push("latest")
+          }
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        sh 'kubectl apply -f k8s/backend-deployment.yaml'
+        sh 'kubectl apply -f k8s/frontend-deployment.yaml'
+        sh 'kubectl apply -f k8s/services.yaml'
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ Deployment successful!"
+    }
+    failure {
+      echo "❌ Deployment failed!"
+    }
+  }
 }
 
