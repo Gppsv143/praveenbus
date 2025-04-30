@@ -1,17 +1,23 @@
 {
   "name": "praveenbus",
   "version": "1.0.0",
-  "description": "",
+  "description": "PraveenBus web application",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd client && npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["bus", "booking", "travel", "praveenbus"],
+  "author": "Your Name",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   }
 }
+

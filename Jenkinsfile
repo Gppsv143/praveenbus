@@ -35,7 +35,7 @@ pipeline {
       }
     }
 
-    stage('Build Docker Images') {
+    stage('Build & Push Docker Images') {
       steps {
         script {
           docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB_CREDENTIALS) {
@@ -47,22 +47,14 @@ pipeline {
         }
       }
     }
-
-    stage('Deploy to Kubernetes') {
-      steps {
-        sh 'kubectl apply -f k8s/backend-deployment.yaml'
-        sh 'kubectl apply -f k8s/frontend-deployment.yaml'
-        sh 'kubectl apply -f k8s/services.yaml'
-      }
-    }
   }
 
   post {
     success {
-      echo "✅ Deployment successful!"
+      echo "✅ Docker images pushed successfully!"
     }
     failure {
-      echo "❌ Deployment failed!"
+      echo "❌ Docker image push failed!"
     }
   }
 }
